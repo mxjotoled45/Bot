@@ -1,30 +1,29 @@
 import discord
 from bot_brain import gen_pass
 from bot_brain import gen_emoji
+from discord.ext import commands
+
 # La variable intents almacena los privilegios del bot
 intents = discord.Intents.default()
 # Activar el privilegio de lectura de mensajes
 intents.message_content = True
 # Crear un bot en la variable cliente y transferirle los privilegios
-client = discord.Client(intents=intents)
+bot = commands.Bot(command_prefix="$", intents=intents)
 
-@client.event
+@bot.event
 async def on_ready():
-    print(f'Hemos iniciado sesión como {client.user}')
+    print(f'Hemos iniciado sesión como {bot.user}')
 
-@client.event
-async def on_message(message):
-    if message.author == client.user:
-        return
-    if message.content.startswith('$hello'):
-        await message.channel.send("Hi!")
-    elif message.content.startswith("$pasword"):
-        await message.channel.send(gen_pass(10))
-    elif message.content.startswith('$bye'):
-        await message.channel.send("\U0001f642") 
-    elif message.content.startswith("$emoji"):  
-        await message.channel.send(gen_emoji())
-    else:
-        await message.channel.send(message.content)
+@bot.command() 
+async def hello(ctx):
+    await ctx.send("hi")
+@bot.command()
+async def bye(ctx):
+    await ctx.send("\\U0001f642")
+@bot.command()
+async def password(ctx):
+    await ctx.send(gen_pass(10))
 
-client.run("TOKEN")
+
+
+bot.run("Token")
