@@ -1,29 +1,56 @@
 import discord
-from bot_brain import gen_pass
 from bot_brain import gen_emoji
+from bot_brain import gen_pass
 from discord.ext import commands
+import random
 
 # La variable intents almacena los privilegios del bot
 intents = discord.Intents.default()
 # Activar el privilegio de lectura de mensajes
 intents.message_content = True
-# Crear un bot en la variable cliente y transferirle los privilegios
+# Crear un bot en la variable bot y transferirle los privilegios
 bot = commands.Bot(command_prefix="$", intents=intents)
 
 @bot.event
 async def on_ready():
     print(f'Hemos iniciado sesión como {bot.user}')
 
-@bot.command() 
+@bot.command()
 async def hello(ctx):
     await ctx.send("hi")
+
 @bot.command()
 async def bye(ctx):
     await ctx.send("\\U0001f642")
+
 @bot.command()
 async def password(ctx):
+    # Genera y envía una contraseña de 10 caracteres
     await ctx.send(gen_pass(10))
 
+@bot.command()
+async def emoji(ctx):
+    # Genera y envía un emoji usando la función gen_emoji
+    await ctx.send(gen_emoji())
 
+# Comando para jugar al juego de adivinanzas
+@bot.command(name='jugar')
+async def jugar(ctx):
+    numero_secreto = random.randint(1, 10)
+    await ctx.send("¡Estoy pensando en un número entre 1 y 10! ¿Cuál crees que es?")
 
-bot.run("Token")
+    def verificar(mensaje):
+        return mensaje.author == ctx.author and mensaje.content.isdigit()
+
+    while True:
+        mensaje = await bot.wait_for('message', check=verificar)
+        adivinanza = int(mensaje.content)
+
+        if adivinanza == numero_secreto:
+            await ctx.send(f"¡Correcto, {ctx.author.name}! Adivinaste el número.")
+            break
+        else:
+            await ctx.send("¡Intenta de nuevo!")
+
+# Ejecutar el bot con el token
+bot.run("TOKEN")
